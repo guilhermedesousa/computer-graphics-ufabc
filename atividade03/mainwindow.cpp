@@ -29,10 +29,10 @@ void MainWindow::paintEvent(QPaintEvent *)
         case 0:
             break;
         case 1:
-            painter.drawRect(30,30,30,60);
+            painter.drawRect(30, 30, 30, 60);
             break;
         case 2:
-            painter.drawEllipse(30,30,30,30);
+            painter.drawEllipse(30, 30, 30, 30);
             break;
     }
 }
