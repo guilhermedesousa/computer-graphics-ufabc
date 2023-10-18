@@ -12,10 +12,15 @@ OpenGLWidget::~OpenGLWidget(){
 
 void OpenGLWidget::initializeGL(){
     initializeOpenGLFunctions();
-    glClearColor(1,1,1,1);
+    glClearColor(0,0,0,0);
 
     qDebug("OpenGL Version: %s", glGetString(GL_VERSION));
     qDebug("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    connect(&timer, &QTimer::timeout,this,&OpenGLWidget::animate);
+    timer.start(0);
+
+    elapsedTime.start();
 
     createShaders();
     createVBOs();
@@ -31,17 +36,29 @@ void OpenGLWidget::paintGL(){
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(shaderProgram);
-    glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-}
+    GLint locScaling{glGetUniformLocation(shaderProgram, "scaling")};
+    GLint locTranslation{glGetUniformLocation(shaderProgram, "translation")};
 
-void OpenGLWidget::toggleDarkMode(bool changeToDarkMode){
-    makeCurrent();
-    if(changeToDarkMode)
-        glClearColor(0,0,0,1);
-    else
-        glClearColor(1,1,1,1);
-    update();
+    glBindVertexArray(vao);
+
+    // player
+    glUniform4f(locTranslation, -0.8f, playerPosY,0,0);
+    glUniform1f(locScaling, 0.2f);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+
+    // target
+    glUniform4f(locTranslation, 0.8f, targetPosY,0,0);
+    glUniform1f(locScaling, 0.1f);
+    glDrawElements(GL_LINE_STRIP, indices.size(), GL_UNSIGNED_INT, 0);
+
+    // projectile
+    if (shooting) {
+        glUniform4f(locTranslation, projectilePos[0], projectilePos[1] , 0, 0);
+        glUniform1f(locScaling, 0.05f);
+        //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_LINES,0,2);
+        glDrawArrays(GL_LINES,2,2);
+    }
 }
 
 void OpenGLWidget::createShaders(){
@@ -177,7 +194,6 @@ void OpenGLWidget::createVBOs(){
     glGenBuffers(1,&eboIndices);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboIndices);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
 }
 
 void OpenGLWidget::destroyVBOs(){
@@ -209,8 +225,77 @@ void OpenGLWidget::changeDiagonal(){
 
 void OpenGLWidget::keyPressEvent(QKeyEvent *event){
     switch(event->key()) {
+        case Qt::Key_Up:
+            playerPosYOffset = 2.0f;
+        break;
+        case Qt::Key_Down:
+            playerPosYOffset = -2.0f;
+        break;
+        case Qt::Key_Space:
+            if (!shooting) {
+                shooting = true;
+                projectilePos[0] = -0.7;
+                projectilePos[1] = playerPosY;
+            }
+        break;
         case Qt::Key_Escape:
-        QApplication::quit();
+            QApplication::quit();
         break;//desnecessario
     }
+}
+
+void OpenGLWidget::keyReleaseEvent(QKeyEvent *event) {
+    switch(event->key()) {
+        case Qt::Key_Up:
+            playerPosYOffset = 0.0f;
+            break;
+        case Qt::Key_Down:
+            playerPosYOffset = 0.0f;
+            break;
+    }
+}
+
+void OpenGLWidget::animate() {
+    float elTime{elapsedTime.restart()/1000.0f};
+
+    // player
+    playerPosY += playerPosYOffset * elTime;
+
+    if (playerPosY < -0.8f) playerPosY = -0.8f;
+    if (playerPosY > 0.8f) playerPosY = 0.8f;
+
+    // target
+    targetPosY += targetPosYOffset * elTime;
+
+    if (targetPosYOffset > 0) {
+        if (targetPosY > 0.8f) {
+            targetPosY = 0.8f;
+            targetPosYOffset = -targetPosYOffset;
+        }
+    } else {
+        if (targetPosY < -0.8f) {
+            targetPosY = -0.8f;
+            targetPosYOffset = -targetPosYOffset;
+        }
+    }
+
+    // projectile
+    if (shooting) {
+        projectilePos[0] += 3.0f * elTime;
+
+        if (projectilePos[0] > 0.8f) {
+            if (std::fabs(projectilePos[1] - targetPosY) < 0.125f) {
+                numHits++;
+                qDebug("Hit!!!");
+                emit updateHitsLabel(QString("Hits: %1").arg(numHits));
+                shooting = false;
+            }
+        }
+    }
+
+    if (projectilePos[0] > 1.0f) {
+        shooting = false;
+    }
+
+    update();
 }
