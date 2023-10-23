@@ -1,23 +1,21 @@
 #include "openglwidget.h"
 
-OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent)
-{
-
-}
+OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent) {}
 
 OpenGLWidget::~OpenGLWidget(){
     destroyVBOs();
     destroyShaders();
 }
 
+// setup inicial do ambiente OpenGL
 void OpenGLWidget::initializeGL(){
     initializeOpenGLFunctions();
-    glClearColor(0,0,0,0);
+    glClearColor(0, 0, 0, 0);
 
     qDebug("OpenGL Version: %s", glGetString(GL_VERSION));
     qDebug("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    connect(&timer, &QTimer::timeout,this,&OpenGLWidget::animate);
+    connect(&timer, &QTimer::timeout, this, &OpenGLWidget::animate);
     timer.start(0);
 
     elapsedTime.start();
@@ -28,10 +26,9 @@ void OpenGLWidget::initializeGL(){
     changeDiagonal();
 }
 
-void OpenGLWidget::resizeGL(int w, int h){
+void OpenGLWidget::resizeGL(int w, int h) {}
 
-}
-
+// desenha os elementos na tela usando OpenGL
 void OpenGLWidget::paintGL(){
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -42,33 +39,35 @@ void OpenGLWidget::paintGL(){
     glBindVertexArray(vao);
 
     // player
-    glUniform4f(locTranslation, -0.8f, playerPosY,0,0);
+    glUniform4f(locTranslation, -0.8f, playerPosY, 0, 0);
     glUniform1f(locScaling, 0.2f);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
     // target
-    glUniform4f(locTranslation, 0.8f, targetPosY,0,0);
-    glUniform1f(locScaling, 0.1f);
-    glDrawElements(GL_LINE_STRIP, indices.size(), GL_UNSIGNED_INT, 0);
+    glUniform4f(locTranslation, 0.8f, targetPosY, 0, 0);
+    glUniform1f(locScaling, 0.15f);
+    glDrawArrays(GL_LINE_LOOP, 0, 2);
+    glDrawArrays(GL_LINE_LOOP, 1, 2);
+    glDrawArrays(GL_LINE_LOOP, 2, 2);
 
     // projectile
     if (shooting) {
         glUniform4f(locTranslation, projectilePos[0], projectilePos[1] , 0, 0);
-        glUniform1f(locScaling, 0.05f);
-        //glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        glDrawArrays(GL_LINES,0,2);
-        glDrawArrays(GL_LINES,2,2);
+        glUniform1f(locScaling, 0.03f);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }
 }
 
+// criar e compilar os shaders
 void OpenGLWidget::createShaders(){
     makeCurrent();
     destroyShaders();
+
     QFile vs(":/shaders/vshader1.glsl");
     QFile fs(":/shaders/fshader1.glsl");
 
-    if(!vs.open((QFile::ReadOnly | QFile::Text))) return; //inserir mensagem de erro
-    if(!fs.open((QFile::ReadOnly | QFile::Text))) return; //inserir mensagem de erro
+    if (!vs.open((QFile::ReadOnly | QFile::Text))) return; // inserir mensagem de erro
+    if (!fs.open((QFile::ReadOnly | QFile::Text))) return; // inserir mensagem de erro
 
     auto byteArrayVs{vs.readAll()};
     auto byteArrayFs{fs.readAll()};
@@ -80,50 +79,50 @@ void OpenGLWidget::createShaders(){
     fs.close();
 
     GLuint vertexShader{ glCreateShader(GL_VERTEX_SHADER) };
-    glShaderSource( vertexShader , 1, &c_strVs, 0 );
-    glCompileShader( vertexShader );
+    glShaderSource(vertexShader, 1, &c_strVs, 0);
+    glCompileShader(vertexShader);
 
-    GLint isCompiled{0};
-    glGetShaderiv( vertexShader, GL_COMPILE_STATUS, &isCompiled );
+    GLint isCompiled{ 0 };
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
 
-    if(isCompiled == GL_FALSE){
-        GLint maxLength{0};
-        glGetShaderiv( vertexShader , GL_INFO_LOG_LENGTH, &maxLength );
+    if (isCompiled == GL_FALSE) {
+        GLint maxLength{ 0 };
+        glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
         std::vector<GLchar> infoLog(maxLength);
-        glGetShaderInfoLog( vertexShader, maxLength, &maxLength, &infoLog[0] );
+        glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &infoLog[0]);
         qDebug("%s", &infoLog[0]);
-        glDeleteShader( vertexShader );
+        glDeleteShader(vertexShader);
         return;
     }
 
     GLuint fragmentShader{ glCreateShader(GL_FRAGMENT_SHADER) };
-    glShaderSource( fragmentShader , 1, &c_strFs, 0 );
-    glCompileShader( fragmentShader );
+    glShaderSource(fragmentShader, 1, &c_strFs, 0);
+    glCompileShader(fragmentShader);
 
-    glGetShaderiv( fragmentShader, GL_COMPILE_STATUS, &isCompiled );
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
 
-    if(isCompiled == GL_FALSE){
-        GLint maxLength{0};
-        glGetShaderiv( fragmentShader , GL_INFO_LOG_LENGTH, &maxLength );
+    if (isCompiled == GL_FALSE) {
+        GLint maxLength{ 0 };
+        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
         std::vector<GLchar> infoLog(maxLength);
-        glGetShaderInfoLog( fragmentShader, maxLength, &maxLength, &infoLog[0] );
+        glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &infoLog[0]);
         qDebug("%s", &infoLog[0]);
-        glDeleteShader( vertexShader );
-        glDeleteShader( fragmentShader );
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
         return;
     }
 
     shaderProgram = glCreateProgram();
-    glAttachShader( shaderProgram, vertexShader );
-    glAttachShader( shaderProgram, fragmentShader );
-    glLinkProgram( shaderProgram );
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
 
-    GLint isLinked{0};
+    GLint isLinked{ 0 };
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &isLinked);
 
-    if(isLinked == GL_FALSE){
-        GLint maxLength{0};
-        glGetProgramiv( shaderProgram, GL_INFO_LOG_LENGTH, &maxLength );
+    if (isLinked == GL_FALSE) {
+        GLint maxLength{ 0 };
+        glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
         std::vector<GLchar> infoLog(maxLength);
         glGetProgramInfoLog(shaderProgram , maxLength, &maxLength, &infoLog[0]);
         qDebug("%s", &infoLog[0]);
@@ -133,17 +132,19 @@ void OpenGLWidget::createShaders(){
         return;
     }
 
-    glDetachShader( shaderProgram , vertexShader );
-    glDetachShader( shaderProgram , fragmentShader );
-    glDeleteShader( vertexShader );
-    glDeleteShader( fragmentShader );
+    glDetachShader(shaderProgram, vertexShader);
+    glDetachShader(shaderProgram, fragmentShader);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 }
 
-void OpenGLWidget::destroyShaders(){
+// destruir os shaders
+void OpenGLWidget::destroyShaders() {
     makeCurrent();
-    glDeleteProgram( shaderProgram );
+    glDeleteProgram(shaderProgram);
 }
 
+// criar os buffers de vertices
 void OpenGLWidget::createVBOs(){
     makeCurrent();
     destroyVBOs();
@@ -158,13 +159,13 @@ void OpenGLWidget::createVBOs(){
     vertices[2] = QVector4D( 0.5, 0.5, 0, 1 );
     vertices[3] = QVector4D( -0.5, 0.5, 0, 1 );
 
-    //definicao das cores
-    colors[0] = QVector4D(1,0,0,1);
-    colors[1] = QVector4D(0,1,0,1);
-    colors[2] = QVector4D(0,0,1,1);
-    colors[3] = QVector4D(1,1,0,1);
+    // definicao das cores
+    colors[0] = QVector4D(1,1,1,1);
+    colors[1] = QVector4D(1,1,1,1);
+    colors[2] = QVector4D(1,1,1,1);
+    colors[3] = QVector4D(1,1,1,1);
 
-    //definicao dos indices de cada vertice
+    // definicao dos indices de cada vertice
     indices[0] = 0;
     indices[1] = 1;
     indices[2] = 2;
@@ -172,30 +173,31 @@ void OpenGLWidget::createVBOs(){
     indices[4] = 3;
     indices[5] = 0;
 
-    //envio dos vertices, cores e indices para a GPU
+    // envio dos vertices, cores e indices para a GPU
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    //vertices
+    // vertices
     glGenBuffers(1, &vboVertices);
     glBindBuffer(GL_ARRAY_BUFFER, vboVertices);
     glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(QVector4D), vertices.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr); //como os dados acima estao organizados para chegar na GPU
     glEnableVertexAttribArray(0);
 
-    //cores
+    // cores
     glGenBuffers(1, &vboColors);
     glBindBuffer(GL_ARRAY_BUFFER, vboColors);
     glBufferData(GL_ARRAY_BUFFER, colors.size()*sizeof(QVector4D), colors.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr); //como os dados acima estao organizados para chegar na GPU
     glEnableVertexAttribArray(1);
 
-    //indices
+    // indices
     glGenBuffers(1,&eboIndices);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboIndices);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 }
 
+// destruir os buffers de vertices
 void OpenGLWidget::destroyVBOs(){
     makeCurrent();
     glDeleteBuffers(1, &vboVertices);
@@ -208,6 +210,7 @@ void OpenGLWidget::destroyVBOs(){
     vao = 0;
 }
 
+// alterar a diagonal de um objeto renderizado
 void OpenGLWidget::changeDiagonal(){
     makeCurrent();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboIndices);
@@ -223,6 +226,7 @@ void OpenGLWidget::changeDiagonal(){
     update();
 }
 
+// eventos de clique no teclado
 void OpenGLWidget::keyPressEvent(QKeyEvent *event){
     switch(event->key()) {
         case Qt::Key_Up:
@@ -244,6 +248,7 @@ void OpenGLWidget::keyPressEvent(QKeyEvent *event){
     }
 }
 
+// liberacao das teclas
 void OpenGLWidget::keyReleaseEvent(QKeyEvent *event) {
     switch(event->key()) {
         case Qt::Key_Up:
@@ -255,17 +260,22 @@ void OpenGLWidget::keyReleaseEvent(QKeyEvent *event) {
     }
 }
 
+// animacoes do jogo conforme o tempo passa ou teclas sao pressionadas
 void OpenGLWidget::animate() {
     float elTime{elapsedTime.restart()/1000.0f};
 
     // player
     playerPosY += playerPosYOffset * elTime;
 
-    if (playerPosY < -0.8f) playerPosY = -0.8f;
-    if (playerPosY > 0.8f) playerPosY = 0.8f;
+    if (playerPosY < -1.0f) playerPosY = 1.0f;
+    if (playerPosY > 1.0f) playerPosY = -1.0f;
 
     // target
-    targetPosY += targetPosYOffset * elTime;
+    if (numHits == 0) {
+        targetPosY += targetPosYOffset * elTime;
+    } else {
+        targetPosY += targetPosYOffset * elTime * numHits;
+    }
 
     if (targetPosYOffset > 0) {
         if (targetPosY > 0.8f) {
