@@ -44,7 +44,7 @@ void Model::readOFFFile(const QString &fileName)
         indices[i * 3 + 2] = c;
     }
 
-    rescaleModel();
+    //rescaleModel();
     data.close();
 }
 
@@ -74,8 +74,15 @@ void Model::computeBBox()
 void Model::rescaleModel()
 {
     computeBBox();
-    for (size_t i{0}; i < numVertices; i++)
-    {
-        vertices[i] = QVector4D((2.5f/diagonalBB) * (vertices[i].toVector3D() - centroidBB), 1);
-    }
+//    for (size_t i{0}; i < numVertices; i++) {
+//        vertices[i] = QVector4D(
+//            (2.5f / diagonalBB) * (vertices[i].toVector3D() - centroidBB), 1);
+//    }
+
+    float invdiag{2.5f/diagonalBB};
+
+    // primeiro translada e depois escala
+    // só armazena o que queremos fazer
+    modelMatrix.scale(invdiag,invdiag,invdiag);
+    modelMatrix.translate(-centroidBB);
 }

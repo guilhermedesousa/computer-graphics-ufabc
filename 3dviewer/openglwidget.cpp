@@ -30,8 +30,16 @@ void OpenGLWidget::paintGL()
 
     if (!model) return;
 
+    model->modelMatrix.setToIdentity();
+    // rotacao de 90° em torno de z
+    model->modelMatrix.rotate(90,0,0,1);
+    model->rescaleModel();
+
     auto shaderProgramID{model->shaderProgram[model->currentShader]};
     glUseProgram(shaderProgramID);
+
+    auto locModel{glGetUniformLocation(shaderProgramID,"model")};
+    glUniformMatrix4fv(locModel,1,GL_FALSE,model->modelMatrix.data());
 
     glBindVertexArray(model->vao);
     glDrawElements(GL_TRIANGLES,model->indices.size(),GL_UNSIGNED_INT,nullptr);

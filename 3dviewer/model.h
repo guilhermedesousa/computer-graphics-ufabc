@@ -4,6 +4,7 @@
 #include <vector>
 #include <QVector4D>
 #include <QVector3D>
+#include <qmatrix4x4.h>
 #include <QString>
 #include <QFile>
 #include <QTextStream>
@@ -37,6 +38,8 @@ public:
     std::vector<QString> fragmentShaderFileName = {":/shaders/fzdepth.glsl"};
 
     std::vector<unsigned> shaderProgram;
+
+    QMatrix4x4 modelMatrix;
 };
 
 #endif // MODEL_H
