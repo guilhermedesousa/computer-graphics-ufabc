@@ -47,19 +47,13 @@ public:
 
     void createVBOs();
     void createShaders();
-
     void destroyVBOs();
     void destroyShaders();
 
-    //void changeDiagonal();
-
-    //void keyPressEvent(QKeyEvent *event) override;
-
-    signals:
+signals:
 
 public slots:
     void toggleDarkMode(bool);
-    //void showFileOpenDialog();
 
 };
 

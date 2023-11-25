@@ -1,18 +1,21 @@
 #include "openglwidget.h"
 
+// construtor
 OpenGLWidget::OpenGLWidget(QWidget *parent)
     : QOpenGLWidget{parent}
 {
 
 }
 
-
+// destrutor
 OpenGLWidget::~OpenGLWidget()
 {
+    // libera os recursos da placa de vídeo após sair do programa
     destroyVBOs();
     destroyShaders();
 }
 
+// inicializa o programa
 void OpenGLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
@@ -28,89 +31,16 @@ void OpenGLWidget::initializeGL()
     createVBOs();
 }
 
-void OpenGLWidget::resizeGL(int w, int h)
-{
+void OpenGLWidget::resizeGL(int w, int h) {}
 
-}
-
-void OpenGLWidget::drawAxis()
-{
-    makeCurrent();
-
-    glUseProgram(shaderProgram);
-    mModel.setToIdentity();
-    auto locModelMatrix{glGetUniformLocation(shaderProgram,"mModel")};
-    glUniformMatrix4fv(locModelMatrix,1,GL_FALSE,mModel.data());
-
-    glBindVertexArray(vaoAxis);
-    glVertexAttrib4f(1,1.0f,0.0f,0.0f,0.0f); // red axis
-    glDrawArrays(GL_LINES,0,2);
-    glVertexAttrib4f(1,0.0f,1.0f,0.0f,0.0f); // green axis
-    glDrawArrays(GL_LINES,2,2);
-}
-
-void OpenGLWidget::scaleExample()
-{
-    makeCurrent();
-    mModel.setToIdentity();
-
-    double scale[] = {1,1};
-    static double percentage=1;
-    mModel.scale(scale[0]*percentage,scale[1]*percentage,1);
-    percentage-=0.005;
-}
-
-void OpenGLWidget::rotationOrbitExample()
-{
-    makeCurrent();
-    mModel.setToIdentity();
-    static int angle=0;
-
-    mModel.rotate(angle++,QVector3D(0,0,1));
-
-    if(angle>359) angle=0;
-}
-
-void OpenGLWidget::rotationCentroidExample()
-{
-    makeCurrent();
-    mModel.setToIdentity();
-    QVector4D centroid;
-    for (QVector4D x : vertices)
-        centroid+=x;
-    centroid=(1.0f/static_cast<float>(vertices.size()))*centroid;
-
-    static int angle=0;
-
-    mModel.translate(centroid.toVector3D());
-    mModel.rotate(angle++,QVector3D(0,0,1));
-    mModel.translate(-centroid.toVector3D());
-    if(angle>359) angle=0;
-}
-
-void OpenGLWidget::nonComutativeExample()
-{
-    makeCurrent();
-    mModel.setToIdentity();
-
-    QVector4D centroid;
-    for (QVector4D x : vertices)
-        centroid+=x;
-
-    centroid=(1.0f/static_cast<float>(vertices.size()))*centroid;
-    static int angle=0;
-    mModel.translate(-centroid.toVector3D());
-    mModel.rotate(angle++,QVector3D(0,0,1));
-    mModel.translate(centroid.toVector3D());
-    if(angle>359) angle=0;
-}
-
+// renderiaz o objeto na opengl widget
 void OpenGLWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
     drawAxis();
 
+    // desenha o objeto fixo
     glBindVertexArray(vao);
     auto locModelMatrix{glGetUniformLocation(shaderProgram,"mModel")};
     glUniformMatrix4fv(locModelMatrix,1,GL_FALSE,mModel.data());
@@ -121,8 +51,95 @@ void OpenGLWidget::paintGL()
     //rotationCentroidExample();
     nonComutativeExample();
 
+    // desenha o objeto uma outra vez (novos dados da matriz)
     glUniformMatrix4fv(locModelMatrix,1,GL_FALSE,mModel.data());
     glDrawElements(GL_TRIANGLES,indices.size(),GL_UNSIGNED_INT,0);
+}
+
+// desenha os eixos da janela
+void OpenGLWidget::drawAxis()
+{
+    makeCurrent();
+
+    glUseProgram(shaderProgram);
+    mModel.setToIdentity();
+
+    auto locModelMatrix{glGetUniformLocation(shaderProgram,"mModel")};
+    glUniformMatrix4fv(locModelMatrix,1,GL_FALSE,mModel.data());
+
+    glBindVertexArray(vaoAxis);
+    glVertexAttrib4f(1,1.0f,0.0f,0.0f,0.0f); // red axis
+    glDrawArrays(GL_LINES,0,2);
+    glVertexAttrib4f(1,0.0f,1.0f,0.0f,0.0f); // green axis
+    glDrawArrays(GL_LINES,2,2);
+}
+
+// rotacao em torno da origem
+void OpenGLWidget::rotationOrbitExample()
+{
+    makeCurrent();
+
+    mModel.setToIdentity(); // matriz identidade
+    static int angle=0;
+
+    mModel.rotate(angle++,QVector3D(0,0,1));
+
+    if (angle>359) angle=0;
+}
+
+// escala
+void OpenGLWidget::scaleExample()
+{
+    makeCurrent();
+
+    mModel.setToIdentity();
+
+    double scale[] = {1,1};
+    static double percentage=1;
+
+    mModel.scale(scale[0]*percentage,scale[1]*percentage,1);
+    percentage -= 0.005;
+}
+
+// rotacao em torno do centro de massa
+void OpenGLWidget::rotationCentroidExample()
+{
+    makeCurrent();
+
+    mModel.setToIdentity();
+    QVector4D centroid;
+    for (QVector4D x : vertices)
+        centroid+=x;
+    centroid = (1.0f/static_cast<float>(vertices.size()))*centroid;
+
+    static int angle=0;
+
+    mModel.translate(centroid.toVector3D());
+    mModel.rotate(angle++,QVector3D(0,0,1));
+    mModel.translate(-centroid.toVector3D());
+
+    if (angle>359) angle=0;
+}
+
+// nao comutatividade
+void OpenGLWidget::nonComutativeExample()
+{
+    makeCurrent();
+
+    mModel.setToIdentity();
+
+    QVector4D centroid;
+    for (QVector4D x : vertices)
+        centroid+=x;
+    centroid=(1.0f/static_cast<float>(vertices.size()))*centroid;
+
+    static int angle=0;
+
+    mModel.translate(-centroid.toVector3D());
+    mModel.rotate(angle++,QVector3D(0,0,1));
+    mModel.translate(centroid.toVector3D());
+
+    if(angle>359) angle=0;
 }
 
 void OpenGLWidget::toggleDarkMode(bool changeToDarkMode)
