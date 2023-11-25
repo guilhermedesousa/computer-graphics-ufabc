@@ -1,10 +1,12 @@
 #include "model.h"
 
+// construtor
 Model::Model()
 {
     shaderProgram.resize(fragmentShaderFileName.size());
 }
 
+// faz a leitura do arquivo .off
 void Model::readOFFFile(const QString &fileName)
 {
     QFile data(fileName);
@@ -23,31 +25,33 @@ void Model::readOFFFile(const QString &fileName)
     stream >> numVertices >> numFaces >> notUsed;
 
     vertices.resize(numVertices);
-    indices.resize(3 * numFaces);
+    indices.resize(3*numFaces);
 
+    // vertices (coordenadas)
     float x,y,z;
 
-    //vertices
     for (size_t i{0}; i < numVertices; ++i)
     {
         stream >> x >> y >> z;
         vertices[i] = QVector4D(x,y,z,1);
     }
 
-    //faces
+    // faces
     unsigned a,b,c;
+
     for (size_t i{0}; i < numFaces; ++i)
     {
         stream >> notUsed >> a >> b >> c;
-        indices[i * 3 + 0] = a;
-        indices[i * 3 + 1] = b;
-        indices[i * 3 + 2] = c;
+        indices[i*3 + 0] = a;
+        indices[i*3 + 1] = b;
+        indices[i*3 + 2] = c;
     }
 
-    //rescaleModel();
+    rescaleModel();
     data.close();
 }
 
+// calcula o centroide e a diagonal do modelo
 void Model::computeBBox()
 {
     auto minLim = std::numeric_limits<float>::lowest();
@@ -74,15 +78,11 @@ void Model::computeBBox()
 void Model::rescaleModel()
 {
     computeBBox();
-//    for (size_t i{0}; i < numVertices; i++) {
-//        vertices[i] = QVector4D(
-//            (2.5f / diagonalBB) * (vertices[i].toVector3D() - centroidBB), 1);
-//    }
 
-    float invdiag{2.5f/diagonalBB};
-
-    // primeiro translada e depois escala
-    // só armazena o que queremos fazer
-    modelMatrix.scale(invdiag,invdiag,invdiag);
-    modelMatrix.translate(-centroidBB);
+    // altera os vertices para enquadrar na tela
+    for (size_t i{0}; i < numVertices; i++) {
+        vertices[i] = QVector4D(
+            (2.5f / diagonalBB) * (vertices[i].toVector3D() - centroidBB),
+            1);
+    }
 }

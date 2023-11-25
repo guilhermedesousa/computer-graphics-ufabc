@@ -1,17 +1,21 @@
 #include "openglwidget.h"
 
+// construtor
 OpenGLWidget::OpenGLWidget(QWidget *parent)
     : QOpenGLWidget{parent}
 {
 
 }
 
+// destrutor
 OpenGLWidget::~OpenGLWidget()
 {
+    // libera os recursos da placa de vídeo após sair do programa
     destroyVBOs(model);
     destroyShaders(model);
 }
 
+// inicializador do programa
 void OpenGLWidget::initializeGL()
 {
     initializeOpenGLFunctions();
@@ -19,65 +23,45 @@ void OpenGLWidget::initializeGL()
     qDebug("OpenGL Version: %s", glGetString(GL_VERSION));
     qDebug("GSL Version %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
+    // teste de profundidade para objetos 3D
     glEnable(GL_DEPTH_TEST);
 }
 
 void OpenGLWidget::resizeGL(int w, int h) {}
 
+// renderizar o modelo na opengl widget
 void OpenGLWidget::paintGL()
 {
+    // limpa o buffer de cores e o buffer de profundidade
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if (!model) return;
 
-    model->modelMatrix.setToIdentity();
-    // rotacao de 90° em torno de z
-    model->modelMatrix.rotate(90,0,0,1);
-    model->rescaleModel();
-
     auto shaderProgramID{model->shaderProgram[model->currentShader]};
     glUseProgram(shaderProgramID);
-
-    auto locModel{glGetUniformLocation(shaderProgramID,"model")};
-    glUniformMatrix4fv(locModel,1,GL_FALSE,model->modelMatrix.data());
 
     glBindVertexArray(model->vao);
     glDrawElements(GL_TRIANGLES,model->indices.size(),GL_UNSIGNED_INT,nullptr);
 }
 
+// toggle para o modo escuro da opengl widget
 void OpenGLWidget::toggleDarkMode(bool changeToDarkMode)
 {
     makeCurrent();
-    if (changeToDarkMode) {
+
+    if (changeToDarkMode)
         glClearColor(0,0,0,1);
-    } else {
+    else
         glClearColor(1,1,1,1);
-    }
+
     update();
 }
 
-void OpenGLWidget::destroyVBOs(std::shared_ptr<Model> m) {
+// cria os VBOs do modelo
+void OpenGLWidget::createVBOs(std::shared_ptr<Model> m)
+{
     makeCurrent();
-    if (!m) return;
-    glDeleteBuffers(1,&m->vboVertices);
-    glDeleteBuffers(1,&m->eboIndices);
-    glDeleteVertexArrays(1,&m->vao);
-    m->vboVertices = 0;
-    m->eboIndices = 0;
-    m->vao = 0;
-}
 
-void OpenGLWidget::destroyShaders(std::shared_ptr<Model> m) {
-    makeCurrent();
-    if (!m) return;
-    for (GLuint shaderProgramID : m->shaderProgram)
-    {
-        glDeleteProgram(shaderProgramID);
-    }
-}
-
-void OpenGLWidget::createVBOs(std::shared_ptr<Model> m) {
-    makeCurrent();
     if (!m) return;
 
     destroyVBOs(m);
@@ -87,19 +71,38 @@ void OpenGLWidget::createVBOs(std::shared_ptr<Model> m) {
 
     glGenBuffers(1,&m->vboVertices);
     glBindBuffer(GL_ARRAY_BUFFER,m->vboVertices);
-    glBufferData(GL_ARRAY_BUFFER,m->numVertices * sizeof(QVector4D),m->vertices.data(),GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,m->numVertices*sizeof(QVector4D),m->vertices.data(),GL_STATIC_DRAW);
     glVertexAttribPointer(0,4,GL_FLOAT,GL_FALSE,0,nullptr);
     glEnableVertexAttribArray(0);
 
     glGenBuffers(1,&m->eboIndices);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,m->eboIndices);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,m->numFaces * 3 * sizeof(GLuint),m->indices.data(),GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,m->numFaces*3*sizeof(GLuint),m->indices.data(),GL_STATIC_DRAW);
 }
 
+// destroi os vbos criados
+void OpenGLWidget::destroyVBOs(std::shared_ptr<Model> m)
+{
+    makeCurrent();
+
+    if (!m) return;
+
+    glDeleteBuffers(1,&m->vboVertices);
+    glDeleteBuffers(1,&m->eboIndices);
+    glDeleteVertexArrays(1,&m->vao);
+
+    m->vboVertices = 0;
+    m->eboIndices = 0;
+    m->vao = 0;
+}
+
+// cria os shaders do modelo
 void OpenGLWidget::createShaders(std::shared_ptr<Model> m)
 {
     makeCurrent();
-    if(!m) return; // testar sem esta linha
+
+    if(!m) return;
+
     destroyShaders(m);
 
     for (size_t i{0}; i < m->shaderProgram.size(); i++)
@@ -112,6 +115,7 @@ void OpenGLWidget::createShaders(std::shared_ptr<Model> m)
             qDebug("Vertex Shader not found");
             return;
         }
+
         if (!fs.open(QFile::ReadOnly | QFile::Text))
         {
             qDebug("Fragment Shader not found");
@@ -133,6 +137,7 @@ void OpenGLWidget::createShaders(std::shared_ptr<Model> m)
 
         GLint isCompiled{0};
         glGetShaderiv(vertexShader,GL_COMPILE_STATUS,&isCompiled);
+
         if (!isCompiled)
         {
             GLint maxLength{0};
@@ -150,6 +155,7 @@ void OpenGLWidget::createShaders(std::shared_ptr<Model> m)
 
         isCompiled = 0;
         glGetShaderiv(fragmentShader,GL_COMPILE_STATUS,&isCompiled);
+
         if (!isCompiled)
         {
             GLint maxLength{0};
@@ -163,12 +169,13 @@ void OpenGLWidget::createShaders(std::shared_ptr<Model> m)
         }
 
         m->shaderProgram[i] = glCreateProgram();
-        glAttachShader(m->shaderProgram[i], vertexShader);
-        glAttachShader(m->shaderProgram[i], fragmentShader);
+        glAttachShader(m->shaderProgram[i],vertexShader);
+        glAttachShader(m->shaderProgram[i],fragmentShader);
         glLinkProgram(m->shaderProgram[i]);
 
         GLint isLinked{0};
         glGetProgramiv(m->shaderProgram[i],GL_LINK_STATUS,&isLinked);
+
         if (!isLinked)
         {
             GLint maxLength{0};
@@ -182,13 +189,27 @@ void OpenGLWidget::createShaders(std::shared_ptr<Model> m)
             return;
         }
 
-        glDetachShader(m->shaderProgram[i], vertexShader);
-        glDetachShader(m->shaderProgram[i], fragmentShader);
+        glDetachShader(m->shaderProgram[i],vertexShader);
+        glDetachShader(m->shaderProgram[i],fragmentShader);
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
     }
 }
 
+// destroi os shaders criados
+void OpenGLWidget::destroyShaders(std::shared_ptr<Model> m)
+{
+    makeCurrent();
+
+    if (!m) return;
+
+    for (GLuint shaderProgramID : m->shaderProgram)
+    {
+        glDeleteProgram(shaderProgramID);
+    }
+}
+
+// abre a caixa de dialogo para selecao do arquivo
 void OpenGLWidget::showFileOpenDialog() {
     QString fileName = QFileDialog::getOpenFileName(this,"Open File",QDir::homePath(),QString("OFF File (*.off)"),
                                                     nullptr
@@ -210,11 +231,13 @@ void OpenGLWidget::showFileOpenDialog() {
     update();
 }
 
+// sair da aplicacao ao clicar no botao de escape (ESC)
 void OpenGLWidget::keyPressEvent(QKeyEvent *event)
 {
-    switch (event->key()) {
-    case Qt::Key_Escape:
-        QApplication::quit();
-        break;
+    switch (event->key())
+    {
+        case Qt::Key_Escape:
+            QApplication::quit();
+            break;
     }
 }

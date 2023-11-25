@@ -24,7 +24,7 @@ public:
     void paintGL() override;
     void keyPressEvent(QKeyEvent *event) override;
 
-    std::shared_ptr<Model> model;
+    std::shared_ptr<Model> model; // unico ponteiro para o modelo
 
     void createVBOs(std::shared_ptr<Model>);
     void destroyVBOs(std::shared_ptr<Model>);
