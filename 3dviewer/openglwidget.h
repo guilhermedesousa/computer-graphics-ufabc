@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <memory>
 #include <model.h>
+#include <camera.h>
 
 class OpenGLWidget : public QOpenGLWidget, protected QOpenGLExtraFunctions
 {
@@ -30,6 +31,8 @@ public:
     void destroyVBOs(std::shared_ptr<Model>);
     void createShaders(std::shared_ptr<Model>);
     void destroyShaders(std::shared_ptr<Model>);
+
+    Camera camera;
 
 signals:
     void statusBarMessage(QString);

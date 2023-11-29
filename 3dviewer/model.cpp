@@ -47,7 +47,6 @@ void Model::readOFFFile(const QString &fileName)
         indices[i*3 + 2] = c;
     }
 
-    rescaleModel();
     data.close();
 }
 
@@ -79,10 +78,7 @@ void Model::rescaleModel()
 {
     computeBBox();
 
-    // altera os vertices para enquadrar na tela
-    for (size_t i{0}; i < numVertices; i++) {
-        vertices[i] = QVector4D(
-            (2.5f / diagonalBB) * (vertices[i].toVector3D() - centroidBB),
-            1);
-    }
+    float invdiag{2.5f/diagonalBB};
+    modelMatrix.scale(invdiag,invdiag,invdiag);
+    modelMatrix.translate(-centroidBB);
 }

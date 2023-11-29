@@ -27,7 +27,7 @@ void OpenGLWidget::initializeGL()
     glEnable(GL_DEPTH_TEST);
 }
 
-void OpenGLWidget::resizeGL(int w, int h) {}
+void OpenGLWidget::resizeGL(int, int) {}
 
 // renderizar o modelo na opengl widget
 void OpenGLWidget::paintGL()
@@ -37,11 +37,19 @@ void OpenGLWidget::paintGL()
 
     if (!model) return;
 
-    auto shaderProgramID{model->shaderProgram[model->currentShader]};
-    glUseProgram(shaderProgramID);
+    model->modelMatrix.setToIdentity();
+    model->rescaleModel();
 
     glBindVertexArray(model->vao);
-    glDrawElements(GL_TRIANGLES,model->indices.size(),GL_UNSIGNED_INT,nullptr);
+    auto shaderProgramID{model->shaderProgram[model->currentShader]};
+    glUseProgram(shaderProgramID);
+    auto locModel{glGetUniformLocation(shaderProgramID, "model")};
+    auto locView{glGetUniformLocation(shaderProgramID, "view")};
+
+    glUniformMatrix4fv(locModel, 1, GL_FALSE, model->modelMatrix.data());
+    glUniformMatrix4fv(locView, 1, GL_FALSE, camera.viewMatrix.data());
+
+    glDrawElements(GL_TRIANGLES, model->numFaces * 3, GL_UNSIGNED_INT, nullptr);
 }
 
 // toggle para o modo escuro da opengl widget
