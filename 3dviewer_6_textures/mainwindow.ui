@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>754</width>
+    <height>657</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>3D viewer</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0" colspan="9">
+     <widget class="OpenGLWidget" name="openGLWidget">
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QCheckBox" name="checkBoxDarkMode">
+      <property name="text">
+       <string>Dark Mode</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1" colspan="2">
+     <widget class="QCheckBox" name="checkBoxWireframe">
+      <property name="text">
+       <string>Wireframe</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QCheckBox" name="checkOrthographic">
+      <property name="text">
+       <string>Orthographic</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="2">
+     <widget class="QComboBox" name="shaderComboBox">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <item>
+       <property name="text">
+        <string>z-depth</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>normal colors</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>flat shading</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Gouraud shading</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Phong Shading</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Texture</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Texture Layers</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Normal Map</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Cube Map</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="2" column="2" colspan="2">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>178</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="2" column="4">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Highlight (alpha)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="5">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>1</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="6">
+     <widget class="QSlider" name="alphaHorizontalSlider">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="minimum">
+       <number>1</number>
+      </property>
+      <property name="maximum">
+       <number>500</number>
+      </property>
+      <property name="singleStep">
+       <number>10</number>
+      </property>
+      <property name="pageStep">
+       <number>100</number>
+      </property>
+      <property name="sliderPosition">
+       <number>20</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="7">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>500</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="8">
+     <spacer name="horizontalSpacer_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>122</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>754</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>OpenGLWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>openglwidget.h</header>
+   <slots>
+    <signal>statusBarMessage(QString)</signal>
+    <signal>enableComboShaders(bool)</signal>
+    <signal>enableSliderHighlight(bool)</signal>
+    <slot>toggleDarkMode(bool)</slot>
+    <slot>showFileOpenDialog()</slot>
+    <slot>toggleOrthographic(bool)</slot>
+    <slot>toggleWireframe(bool)</slot>
+    <slot>changeShader(int)</slot>
+    <slot>changeHighlightModel(int)</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>checkBoxDarkMode</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>toggleDarkMode(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>90</x>
+     <y>555</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>395</x>
+     <y>276</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openGLWidget</sender>
+   <signal>statusBarMessage(QString)</signal>
+   <receiver>statusbar</receiver>
+   <slot>showMessage(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>399</x>
+     <y>286</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>587</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpen</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>showFileOpenDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>286</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxWireframe</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>toggleWireframe(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>399</x>
+     <y>553</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>286</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkOrthographic</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>toggleOrthographic(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>661</x>
+     <y>553</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>286</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>shaderComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>changeShader(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>78</x>
+     <y>608</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>376</x>
+     <y>300</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openGLWidget</sender>
+   <signal>enableSliderHighlight(bool)</signal>
+   <receiver>alphaHorizontalSlider</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>376</x>
+     <y>300</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>519</x>
+     <y>608</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openGLWidget</sender>
+   <signal>enableComboShaders(bool)</signal>
+   <receiver>shaderComboBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>376</x>
+     <y>300</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>78</x>
+     <y>608</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>alphaHorizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>changeHighlightModel(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>519</x>
+     <y>608</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>376</x>
+     <y>300</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

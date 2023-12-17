@@ -1,0 +1,39 @@
+<RCC>
+    <qresource prefix="/shaders">
+        <file>vzdepth.glsl</file>
+        <file>fzdepth.glsl</file>
+        <file>fflat.glsl</file>
+        <file>fgouraud.glsl</file>
+        <file>fnormal.glsl</file>
+        <file>fphong.glsl</file>
+        <file>vflat.glsl</file>
+        <file>vgouraud.glsl</file>
+        <file>vnormal.glsl</file>
+        <file>vphong.glsl</file>
+        <file>fcubemap.glsl</file>
+        <file>fnormalmap.glsl</file>
+        <file>ftexture.glsl</file>
+        <file>ftexturelayers.glsl</file>
+        <file>vcubemap.glsl</file>
+        <file>vnormalmap.glsl</file>
+        <file>vtexture.glsl</file>
+        <file>vtexturelayers.glsl</file>
+    </qresource>
+    <qresource prefix="/textures">
+        <file>cubemap/negx.jpg</file>
+        <file>cubemap/negy.jpg</file>
+        <file>cubemap/negz.jpg</file>
+        <file>cubemap/posx.jpg</file>
+        <file>cubemap/posy.jpg</file>
+        <file>cubemap/posz.jpg</file>
+        <file>cubemap/readme.txt</file>
+        <file>images/sapphire_color.jpg</file>
+        <file>images/sapphire_normal.jpg</file>
+        <file>images/nuvem.jpg</file>
+        <file>images/terra.jpg</file>
+        <file>images/Seamless_Pebbles_Texture.jpg</file>
+        <file>images/Seamless_Pebbles_Texture_NORMAL.jpg</file>
+        <file>images/Tileable_White_Polyrattan_Texture.jpg</file>
+        <file>images/Tileable_White_Polyrattan_Texture_NORMAL.jpg</file>
+    </qresource>
+</RCC>

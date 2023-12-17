@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>515</width>
+    <height>410</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="OpenGLWidget" name="openGLWidget"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="QCheckBox" name="checkBox">
+      <property name="text">
+       <string>background color</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>515</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionLoad_Texture"/>
+   </widget>
+   <addaction name="menuFile"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionLoad_Texture">
+   <property name="text">
+    <string>Load Texture</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>OpenGLWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>openglwidget.h</header>
+   <slots>
+    <slot>toggleBackgroundColor(bool)</slot>
+    <slot>loadTexture()</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>checkBox</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>toggleBackgroundColor(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>364</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>250</x>
+     <y>195</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoad_Texture</sender>
+   <signal>triggered()</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>loadTexture()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>257</x>
+     <y>197</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

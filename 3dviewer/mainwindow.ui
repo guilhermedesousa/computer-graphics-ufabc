@@ -15,6 +15,13 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
+    <item row="3" column="0">
+     <widget class="QCheckBox" name="checkBoxWireframe">
+      <property name="text">
+       <string>Wireframe</string>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="0">
      <widget class="OpenGLWidget" name="openGLWidget">
       <property name="focusPolicy">
@@ -22,10 +29,17 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
+    <item row="2" column="0">
      <widget class="QCheckBox" name="checkBoxDarkMode">
       <property name="text">
        <string>Dark Mode</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QCheckBox" name="checkBoxOrthographic">
+      <property name="text">
+       <string>Ortographic</string>
       </property>
      </widget>
     </item>
@@ -64,6 +78,8 @@
     <signal>statusBarMessage(QString)</signal>
     <slot>toggleDarkMode(bool)</slot>
     <slot>showFileOpenDialog()</slot>
+    <slot>toggleWireframe(bool)</slot>
+    <slot>toggleOrthographic(bool)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -108,12 +124,44 @@
    <slot>showFileOpenDialog()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>399</x>
-     <y>285</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
      <y>285</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxWireframe</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>toggleWireframe(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>399</x>
+     <y>533</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>261</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBoxOrthographic</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>openGLWidget</receiver>
+   <slot>toggleOrthographic(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>399</x>
+     <y>559</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>261</y>
     </hint>
    </hints>
   </connection>

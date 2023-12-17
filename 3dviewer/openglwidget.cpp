@@ -27,7 +27,11 @@ void OpenGLWidget::initializeGL()
     glEnable(GL_DEPTH_TEST);
 }
 
-void OpenGLWidget::resizeGL(int, int) {}
+void OpenGLWidget::resizeGL(int width, int height)
+{
+    glViewport(0,0,width,height);
+    camera.resizeViewPort(width,height);
+}
 
 // renderizar o modelo na opengl widget
 void OpenGLWidget::paintGL()
@@ -37,17 +41,29 @@ void OpenGLWidget::paintGL()
 
     if (!model) return;
 
+    if (wireframe)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    else
+        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+
+    camera.resizeViewPort(this->width(),this->height(),orthographic);
+
     model->modelMatrix.setToIdentity();
     model->rescaleModel();
 
     glBindVertexArray(model->vao);
     auto shaderProgramID{model->shaderProgram[model->currentShader]};
     glUseProgram(shaderProgramID);
+
     auto locModel{glGetUniformLocation(shaderProgramID, "model")};
     auto locView{glGetUniformLocation(shaderProgramID, "view")};
+    auto locProjection{glGetUniformLocation(shaderProgramID, "projection")};
+
+    qDebug() << camera.projectionMatrix;
 
     glUniformMatrix4fv(locModel, 1, GL_FALSE, model->modelMatrix.data());
     glUniformMatrix4fv(locView, 1, GL_FALSE, camera.viewMatrix.data());
+    glUniformMatrix4fv(locProjection, 1, GL_FALSE, camera.projectionMatrix.data());
 
     glDrawElements(GL_TRIANGLES, model->numFaces * 3, GL_UNSIGNED_INT, nullptr);
 }
@@ -248,4 +264,18 @@ void OpenGLWidget::keyPressEvent(QKeyEvent *event)
             QApplication::quit();
             break;
     }
+}
+
+void OpenGLWidget::toggleWireframe(bool w)
+{
+    makeCurrent();
+    wireframe=w;
+    update();
+}
+
+void OpenGLWidget::toggleOrthographic(bool ortho)
+{
+    makeCurrent();
+    orthographic = ortho;
+    update();
 }
